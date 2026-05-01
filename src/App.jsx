@@ -275,8 +275,17 @@ const App = () => {
                   <Show when={rejectCount() === 3}>
                     <div class="main-text inline-block animate-scale-in text-red-400 font-medium">Bir daha olmayacak</div>
                   </Show>
-                  <Show when={rejectCount() >= 4 && rejectCount() < 16}>
+                  <Show when={rejectCount() >= 4 && rejectCount() < 13}>
                     <div class="main-text inline-block animate-scale-in text-pink-400 font-bold">Kız yicem seni heeeee</div>
+                  </Show>
+                  <Show when={rejectCount() === 13}>
+                    <div class="main-text inline-block animate-scale-in text-red-500 font-bold">Bana bunu yaptırmaya zorlama</div>
+                  </Show>
+                  <Show when={rejectCount() === 14}>
+                    <div class="main-text inline-block animate-scale-in text-red-600 font-bold">Bak son şansın</div>
+                  </Show>
+                  <Show when={rejectCount() === 15}>
+                    <div class="main-text inline-block animate-scale-in text-red-700 font-bold">Bunu sen istedinnnn :D</div>
                   </Show>
                 </Show>
               </h1>
