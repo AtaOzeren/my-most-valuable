@@ -6,6 +6,7 @@ const App = () => {
   const [rejectCount, setRejectCount] = createSignal(0);
   const [buttonPos, setButtonPos] = createSignal({ x: 0, y: 0 });
   const [gifIndex, setGifIndex] = createSignal(-1);
+  const [acceptedGif, setAcceptedGif] = createSignal("");
 
   // Dynamically import all gifs from the my-love folder
   const gifs = Object.values(import.meta.glob('./assets/my-love/*.gif', { eager: true, query: '?url', import: 'default' }));
@@ -106,6 +107,16 @@ const App = () => {
       ease: "power2.out",
       stagger: 0.02
     });
+
+    // Daha büyük, daha dramatik bir geçiş
+    gsap.to(orb1, { scale: 12, backgroundColor: "rgba(220, 20, 60, 0.6)", duration: 1.5, ease: "power3.inOut" });
+    gsap.to(orb2, { scale: 12, backgroundColor: "rgba(255, 105, 180, 0.6)", duration: 1.5, ease: "power3.inOut", delay: 0.1 });
+    gsap.to(orb3, { scale: 12, backgroundColor: "rgba(255, 0, 0, 0.6)", duration: 1.5, ease: "power3.inOut", delay: 0.2 });
+
+    // Kabul edilince rastgele sevimli bir gif seç
+    if (gifs.length > 0) {
+      setAcceptedGif(gifs[Math.floor(Math.random() * gifs.length)]);
+    }
 
     setResponse('accepted');
   };
@@ -246,7 +257,16 @@ const App = () => {
           </Show>
 
           <Show when={response() === 'accepted'}>
-            <div class="relative space-y-6 animate-scale-in">
+            <div class="relative space-y-6 animate-scale-in flex flex-col items-center">
+              <Show when={acceptedGif()}>
+                <div class="h-48 md:h-64 flex items-center justify-center mb-6">
+                  <img
+                    src={acceptedGif()}
+                    alt="Happy love gif"
+                    class="max-h-full rounded-3xl shadow-2xl border-4 border-white/10"
+                  />
+                </div>
+              </Show>
               <div class="text-5xl md:text-6xl mb-6">❤️</div>
               <h1 class="text-white text-3xl md:text-4xl font-light">Seni çok seviyorum.</h1>
               <p class="text-white/40 italic text-sm md:text-base">Dünyanın en şanslı erkeğiyim...</p>
