@@ -61,6 +61,37 @@ const App = () => {
       yoyo: true,
       ease: "sine.inOut"
     });
+
+    // Giriş Animasyonları
+    // "Güzel sevgilim benim..." yazısı için zarif bir yukarıdan süzülme efekti
+    gsap.from(".main-text", {
+      y: 40,
+      opacity: 0,
+      rotationX: -20,
+      transformOrigin: "bottom center",
+      duration: 1.5,
+      ease: "power4.out",
+      delay: 0.3
+    });
+
+    // "çok özür dilerim" yazısı için vurgulu bir elastik gelme efekti
+    gsap.from(".apology-text", {
+      scale: 0.5,
+      opacity: 0,
+      y: 20,
+      duration: 1.5,
+      ease: "elastic.out(1, 0.4)",
+      delay: 1.2
+    });
+
+    // Butonların zarifçe belirmesi
+    gsap.from(".action-buttons", {
+      opacity: 0,
+      y: 30,
+      duration: 1,
+      ease: "power3.out",
+      delay: 2.0
+    });
   });
 
   const handleAccept = () => {
@@ -172,12 +203,12 @@ const App = () => {
                 </Show>
               </div>
 
-              <h1 class="text-white text-2xl md:text-4xl font-light leading-snug md:leading-relaxed tracking-wide animate-fade-in">
-                Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım, <br class="hidden md:block" />
-                <span class="text-red-800 font-medium italic">çok özür dilerim.</span>
+              <h1 class="text-white text-2xl md:text-4xl font-light leading-snug md:leading-relaxed tracking-wide">
+                <div class="main-text inline-block">Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım,</div> <br class="hidden md:block" />
+                <div class="apology-text inline-block text-red-800 font-medium italic mt-2">çok özür dilerim.</div>
               </h1>
 
-              <div class="flex flex-col gap-4 md:gap-6 justify-center items-center">
+              <div class="action-buttons flex flex-col gap-4 md:gap-6 justify-center items-center">
                 <button
                   onClick={handleAccept}
                   class="w-full md:w-auto px-8 py-4 bg-white text-[#0d2a1a] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10 z-20"
