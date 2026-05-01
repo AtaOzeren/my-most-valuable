@@ -111,6 +111,13 @@ const App = () => {
   };
 
   const handleReject = () => {
+    // 16. tıklama ise butonu yakalıyoruz ve kabul etmeye çeviriyoruz
+    if (rejectCount() === 15) {
+      setRejectCount(16);
+      setButtonPos({ x: 0, y: 0 }); // Butonu merkeze geri çağır
+      return;
+    }
+
     // Reddedilince arka plandaki kırmızı efekti kaldırdık. 
     // Onun yerine beyaz noktalar rastgele etrafa saçılacak.
     gsap.to(".gsap-dot", {
@@ -204,8 +211,12 @@ const App = () => {
               </div>
 
               <h1 class="text-white text-2xl md:text-4xl font-light leading-snug md:leading-relaxed tracking-wide">
-                <div class="main-text inline-block">Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım,</div> <br class="hidden md:block" />
-                <div class="apology-text inline-block text-red-800 font-medium italic mt-2">çok özür dilerim.</div>
+                <Show when={rejectCount() < 16} fallback={
+                  <div class="main-text inline-block text-3xl md:text-5xl font-bold animate-scale-in">Bunu yapmak zorundayım :D</div>
+                }>
+                  <div class="main-text inline-block">Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım,</div> <br class="hidden md:block" />
+                  <div class="apology-text inline-block text-red-800 font-medium italic mt-2">çok özür dilerim.</div>
+                </Show>
               </h1>
 
               <div class="action-buttons flex flex-col gap-4 md:gap-6 justify-center items-center">
@@ -218,14 +229,17 @@ const App = () => {
 
                 <button
                   ref={rejectButtonRef}
-                  onClick={handleReject}
+                  onClick={rejectCount() >= 16 ? handleAccept : handleReject}
                   style={{
                     transform: `translate(${buttonPos().x}px, ${buttonPos().y}px)`,
                     transition: rejectCount() >= 3 ? 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'all 0.2s'
                   }}
-                  class={`px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-2xl whitespace-nowrap shadow-lg shadow-red-900/20 z-10 ${rejectCount() >= 2 ? 'w-auto' : 'w-full md:w-auto'}`}
+                  class={rejectCount() >= 16 
+                    ? "w-full md:w-auto px-8 py-4 bg-white text-[#0d2a1a] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10 z-20"
+                    : `px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-2xl whitespace-nowrap shadow-lg shadow-red-900/20 z-10 ${rejectCount() >= 2 ? 'w-auto' : 'w-full md:w-auto'}`
+                  }
                 >
-                  {getRejectText()}
+                  {rejectCount() >= 16 ? "Özrünü kabul ediyorum" : getRejectText()}
                 </button>
               </div>
             </div>
