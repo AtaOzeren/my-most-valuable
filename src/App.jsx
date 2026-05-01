@@ -32,9 +32,13 @@ const App = () => {
     "Affettin biliyorum 😉",
     "Bir tanesin sen... ❤️",
     "Kaçamazsın! ❤️",
-    "Bir tanesin sen... ❤️",
     "Sabaha kadar devam ettirebilirim 😊",
-    "İnatçı Keçi Seniii ❤️"
+    "İnatçı Keçi Seniii ❤️",
+    "Ben affediyorum sen ne zaman affedicen :D",
+    "Len Basma artik 😅",
+    "Bak hala",
+    "Len Yeterrrr ❤️"
+
   ];
 
   onMount(() => {
@@ -245,7 +249,7 @@ const App = () => {
                     transform: `translate(${buttonPos().x}px, ${buttonPos().y}px)`,
                     transition: rejectCount() >= 3 ? 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'all 0.2s'
                   }}
-                  class={rejectCount() >= 16 
+                  class={rejectCount() >= 16
                     ? "w-full md:w-auto px-8 py-4 bg-white text-[#0d2a1a] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10 z-20"
                     : `px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-2xl whitespace-nowrap shadow-lg shadow-red-900/20 z-10 ${rejectCount() >= 2 ? 'w-auto' : 'w-full md:w-auto'}`
                   }
