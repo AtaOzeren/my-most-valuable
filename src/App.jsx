@@ -17,7 +17,8 @@ const App = () => {
     "Üzme beni... 💔",
     "Affettin biliyorum 😉",
     "Bir tanesin sen... ❤️",
-    "Kaçamazsın! ❤️"
+    "Kaçamazsın! ❤️",
+    "Sabaha kadar devam ettirebilirim 😊"
   ];
 
   onMount(() => {
@@ -28,31 +29,40 @@ const App = () => {
 
   const handleReject = () => {
     if (rejectCount() >= 2) {
-      const btnRect = rejectButtonRef.getBoundingClientRect();
-      const padding = 40;
-      
-      // Calculate available space
-      const availableWidth = window.innerWidth - btnRect.width - padding * 2;
-      const availableHeight = window.innerHeight - btnRect.height - padding * 2;
+      // Use offsetWidth to get the natural size without transformations
+      const btnWidth = rejectButtonRef.offsetWidth;
+      const btnHeight = rejectButtonRef.offsetHeight;
 
-      // We want to avoid the center area (roughly 300px wide, 400px high)
-      const safeZoneWidth = 320;
-      const safeZoneHeight = 450;
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      const padding = 20;
+
+      // Calculate max absolute translate values relative to center
+      const maxX = (screenWidth / 2) - (btnWidth / 2) - padding;
+      const maxY = (screenHeight / 2) - (btnHeight / 2) - padding;
+
+      // Safe zone to avoid overlapping with text/accept button
+      const safeX = 150;
+      const safeY = 200;
 
       let newX, newY;
       let attempts = 0;
 
       do {
-        newX = (Math.random() - 0.5) * availableWidth;
-        newY = (Math.random() - 0.5) * availableHeight;
+        newX = (Math.random() - 0.5) * maxX * 2;
+        newY = (Math.random() - 0.5) * maxY * 2;
         attempts++;
-        // Keep looking if the new position is too close to the center
-      } while (
-        Math.abs(newX) < safeZoneWidth / 2 && 
-        Math.abs(newY) < safeZoneHeight / 2 && 
-        attempts < 20
-      );
-      
+
+        // On very small screens, reduce safe zone requirements to avoid infinite loops
+        const currentSafeX = screenWidth < 400 ? 80 : safeX;
+        const currentSafeY = screenHeight < 600 ? 120 : safeY;
+
+        const isInSafeZone = Math.abs(newX) < currentSafeX && Math.abs(newY) < currentSafeY;
+
+        if (!isInSafeZone || attempts > 50) break;
+      } while (true);
+
       setButtonPos({ x: newX, y: newY });
     }
     setRejectCount(c => c + 1);
@@ -64,7 +74,7 @@ const App = () => {
   };
 
   return (
-    <div class="min-h-screen bg-[#0d2a1a] bg-gradient-to-br from-[#0d2a1a] via-[#1a4d35] to-[#0a1f14] flex items-center justify-center p-6 text-center font-sans overflow-hidden relative">
+    <div class="min-h-screen bg-[#0d2a1a] bg-linear-to-br from-[#0d2a1a] via-[#1a4d35] to-[#0a1f14] flex items-center justify-center p-6 text-center font-sans overflow-hidden relative">
       {/* Background Orbs */}
       <div ref={orb1} class="absolute top-0 left-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-green-500/20 blur-[80px] md:blur-[100px] rounded-full pointer-events-none z-0"></div>
       <div ref={orb2} class="absolute bottom-0 right-0 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-emerald-500/20 blur-[100px] md:blur-[120px] rounded-full pointer-events-none z-0"></div>
@@ -75,25 +85,25 @@ const App = () => {
           <div class="relative space-y-8 md:space-y-12">
             <h1 class="text-white text-2xl md:text-4xl font-light leading-snug md:leading-relaxed tracking-wide animate-fade-in">
               Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım, <br class="hidden md:block" />
-              <span class="text-green-400 font-medium italic">çok özür dilerim.</span>
+              <span class="text-red-800 font-medium italic">çok özür dilerim.</span>
             </h1>
-            
+
             <div class="flex flex-col gap-4 md:gap-6 justify-center items-center">
-              <button 
+              <button
                 onClick={() => setResponse('accepted')}
                 class="w-full md:w-auto px-8 py-4 bg-white text-[#0d2a1a] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10 z-20"
               >
                 Özrünü kabul ediyorum
               </button>
-              
-              <button 
+
+              <button
                 ref={rejectButtonRef}
                 onClick={handleReject}
                 style={{
                   transform: `translate(${buttonPos().x}px, ${buttonPos().y}px)`,
                   transition: rejectCount() >= 3 ? 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'all 0.2s'
                 }}
-                class="w-full md:w-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-2xl whitespace-nowrap shadow-lg shadow-red-900/20 z-10"
+                class={`px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-2xl whitespace-nowrap shadow-lg shadow-red-900/20 z-10 ${rejectCount() >= 2 ? 'w-auto' : 'w-full md:w-auto'}`}
               >
                 {getRejectText()}
               </button>
