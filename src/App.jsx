@@ -1,9 +1,42 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, Show, onMount } from "solid-js";
+import { gsap } from "gsap";
 
 const App = () => {
   const [response, setResponse] = createSignal(null);
   const [rejectCount, setRejectCount] = createSignal(0);
   const [buttonPos, setButtonPos] = createSignal({ x: 0, y: 0 });
+  let orb1, orb2, orb3;
+
+  onMount(() => {
+    console.log("GSAP Background Animation Started", { orb1, orb2, orb3 });
+    // Animate background orbs
+    gsap.to(orb1, {
+      x: 100,
+      y: 150,
+      duration: 10,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+    gsap.to(orb2, {
+      x: -150,
+      y: -100,
+      duration: 12,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      delay: 1
+    });
+    gsap.to(orb3, {
+      x: 120,
+      y: -120,
+      duration: 15,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      delay: 2
+    });
+  });
 
   const rejectionTexts = [
     "Özrünü kabul etmiyorum",
@@ -33,8 +66,13 @@ const App = () => {
   };
 
   return (
-    <div class="min-h-screen bg-[#0d2a1a] bg-gradient-to-br from-[#0d2a1a] via-[#1a4d35] to-[#0a1f14] flex items-center justify-center p-8 text-center font-sans overflow-hidden">
-      <div class="relative max-w-2xl w-full">
+    <div class="min-h-screen bg-[#0d2a1a] bg-gradient-to-br from-[#0d2a1a] via-[#1a4d35] to-[#0a1f14] flex items-center justify-center p-8 text-center font-sans overflow-hidden relative">
+      {/* Background Orbs */}
+      <div ref={orb1} class="absolute top-0 left-0 w-[500px] h-[500px] bg-green-500/20 blur-[100px] rounded-full pointer-events-none z-0"></div>
+      <div ref={orb2} class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-500/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
+      <div ref={orb3} class="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-teal-500/15 blur-[80px] rounded-full pointer-events-none z-0"></div>
+
+      <div class="relative max-w-2xl w-full z-10">
         {/* Subtle decorative glow */}
         <div class="absolute -inset-20 bg-green-500/10 blur-[100px] rounded-full"></div>
 
