@@ -5,6 +5,11 @@ const App = () => {
   const [response, setResponse] = createSignal(null);
   const [rejectCount, setRejectCount] = createSignal(0);
   const [buttonPos, setButtonPos] = createSignal({ x: 0, y: 0 });
+  const [gifIndex, setGifIndex] = createSignal(-1);
+  
+  // Dynamically import all gifs from the my-love folder
+  const gifs = Object.values(import.meta.glob('./assets/my-love/*.gif', { eager: true, query: '?url', import: 'default' }));
+  
   let orb1, orb2, orb3;
   let rejectButtonRef;
 
@@ -28,41 +33,32 @@ const App = () => {
   });
 
   const handleReject = () => {
+    // Increment GIF index
+    setGifIndex((prev) => (prev + 1) % gifs.length);
+
     if (rejectCount() >= 2) {
-      // Use offsetWidth to get the natural size without transformations
       const btnWidth = rejectButtonRef.offsetWidth;
       const btnHeight = rejectButtonRef.offsetHeight;
-
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
-
       const padding = 20;
-
-      // Calculate max absolute translate values relative to center
       const maxX = (screenWidth / 2) - (btnWidth / 2) - padding;
       const maxY = (screenHeight / 2) - (btnHeight / 2) - padding;
-
-      // Safe zone to avoid overlapping with text/accept button
-      const safeX = 150;
+      const safeX = 150; 
       const safeY = 200;
 
       let newX, newY;
       let attempts = 0;
-
       do {
         newX = (Math.random() - 0.5) * maxX * 2;
         newY = (Math.random() - 0.5) * maxY * 2;
         attempts++;
-
-        // On very small screens, reduce safe zone requirements to avoid infinite loops
         const currentSafeX = screenWidth < 400 ? 80 : safeX;
         const currentSafeY = screenHeight < 600 ? 120 : safeY;
-
         const isInSafeZone = Math.abs(newX) < currentSafeX && Math.abs(newY) < currentSafeY;
-
         if (!isInSafeZone || attempts > 50) break;
       } while (true);
-
+      
       setButtonPos({ x: newX, y: newY });
     }
     setRejectCount(c => c + 1);
@@ -82,21 +78,32 @@ const App = () => {
 
       <div class="relative max-w-lg w-full z-10 px-4">
         <Show when={!response()}>
-          <div class="relative space-y-8 md:space-y-12">
+          <div class="relative space-y-6 md:space-y-10">
+            {/* GIF Display Area */}
+            <div class="h-48 md:h-64 flex items-center justify-center">
+              <Show when={gifIndex() !== -1}>
+                <img 
+                  src={gifs[gifIndex()]} 
+                  alt="Cute love gif" 
+                  class="max-h-full rounded-3xl shadow-2xl border-4 border-white/10 animate-scale-in"
+                />
+              </Show>
+            </div>
+
             <h1 class="text-white text-2xl md:text-4xl font-light leading-snug md:leading-relaxed tracking-wide animate-fade-in">
               Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım, <br class="hidden md:block" />
               <span class="text-red-800 font-medium italic">çok özür dilerim.</span>
             </h1>
-
+            
             <div class="flex flex-col gap-4 md:gap-6 justify-center items-center">
-              <button
+              <button 
                 onClick={() => setResponse('accepted')}
                 class="w-full md:w-auto px-8 py-4 bg-white text-[#0d2a1a] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10 z-20"
               >
                 Özrünü kabul ediyorum
               </button>
-
-              <button
+              
+              <button 
                 ref={rejectButtonRef}
                 onClick={handleReject}
                 style={{
