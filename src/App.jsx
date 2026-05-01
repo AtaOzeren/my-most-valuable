@@ -10,6 +10,14 @@ const App = () => {
   // Dynamically import all gifs from the my-love folder
   const gifs = Object.values(import.meta.glob('./assets/my-love/*.gif', { eager: true, query: '?url', import: 'default' }));
   
+  const dots = Array.from({ length: 50 }).map((_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    duration: Math.random() * 5 + 3
+  }));
+
   let orb1, orb2, orb3;
   let rejectButtonRef;
 
@@ -27,37 +35,82 @@ const App = () => {
   ];
 
   onMount(() => {
-    gsap.to(orb1, { x: 50, y: 100, duration: 10, repeat: -1, yoyo: true, ease: "sine.inOut" });
-    gsap.to(orb2, { x: -100, y: -50, duration: 12, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1 });
-    gsap.to(orb3, { x: 80, y: -80, duration: 15, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 2 });
+    // Arka plandaki yuvarlakların çok daha hareketli ve dinamik olması için
+    gsap.to(orb1, { 
+      x: "random(-200, 200)", y: "random(-200, 200)", 
+      duration: 4, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" 
+    });
+    gsap.to(orb2, { 
+      x: "random(-250, 250)", y: "random(-250, 250)", 
+      duration: 5, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" 
+    });
+    gsap.to(orb3, { 
+      x: "random(-150, 150)", y: "random(-150, 150)", 
+      duration: 6, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" 
+    });
+
+    // Beyaz küçük noktaların sürekli hareketi
+    gsap.to(".gsap-dot", {
+      y: () => `-=${Math.random() * 50 + 20}`,
+      x: () => `+=${Math.random() * 40 - 20}`,
+      opacity: () => Math.random() * 0.8 + 0.2,
+      duration: () => Math.random() * 4 + 2,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
   });
 
+  const handleAccept = () => {
+    // Tüm önceki animasyonları durdur
+    gsap.killTweensOf([orb1, orb2, orb3, ".gsap-dot"]);
+    
+    // Beyaz noktaların sevinç hareketi
+    gsap.to(".gsap-dot", {
+      scale: 3,
+      opacity: 1,
+      duration: 1.5,
+      ease: "power2.out",
+      stagger: 0.02
+    });
+    
+    setResponse('accepted');
+  };
+
   const handleReject = () => {
+    // Reddedilince arka plandaki kırmızı efekti kaldırdık. 
+    // Onun yerine beyaz noktalar rastgele etrafa saçılacak.
+    gsap.to(".gsap-dot", {
+      x: () => `+=${(Math.random() - 0.5) * 150}`,
+      y: () => `+=${(Math.random() - 0.5) * 150}`,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+
     // Increment GIF index
     setGifIndex((prev) => (prev + 1) % gifs.length);
 
     if (rejectCount() >= 2) {
-      const btnWidth = rejectButtonRef.offsetWidth;
-      const btnHeight = rejectButtonRef.offsetHeight;
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
+      const rect = rejectButtonRef.getBoundingClientRect();
+      const currentPos = buttonPos();
+      
+      // Orijinal transformsuz konumu buluyoruz
+      const origX = rect.left - currentPos.x;
+      const origY = rect.top - currentPos.y;
+      
       const padding = 20;
-      const maxX = (screenWidth / 2) - (btnWidth / 2) - padding;
-      const maxY = (screenHeight / 2) - (btnHeight / 2) - padding;
-      const safeX = 150; 
-      const safeY = 200;
+      const btnWidth = rect.width;
+      const btnHeight = rect.height;
+      
+      // Ekrandan çıkmaması için gidebileceği minimum ve maksimum X, Y limitleri hesaplanıyor
+      const minX = padding - origX;
+      const maxX = window.innerWidth - btnWidth - padding - origX;
+      
+      const minY = padding - origY;
+      const maxY = window.innerHeight - btnHeight - padding - origY;
 
-      let newX, newY;
-      let attempts = 0;
-      do {
-        newX = (Math.random() - 0.5) * maxX * 2;
-        newY = (Math.random() - 0.5) * maxY * 2;
-        attempts++;
-        const currentSafeX = screenWidth < 400 ? 80 : safeX;
-        const currentSafeY = screenHeight < 600 ? 120 : safeY;
-        const isInSafeZone = Math.abs(newX) < currentSafeX && Math.abs(newY) < currentSafeY;
-        if (!isInSafeZone || attempts > 50) break;
-      } while (true);
+      let newX = minX + Math.random() * (maxX - minX);
+      let newY = minY + Math.random() * (maxY - minY);
       
       setButtonPos({ x: newX, y: newY });
     }
@@ -70,11 +123,38 @@ const App = () => {
   };
 
   return (
-    <div class="min-h-screen bg-[#0d2a1a] bg-linear-to-br from-[#0d2a1a] via-[#1a4d35] to-[#0a1f14] flex items-center justify-center p-6 text-center font-sans overflow-hidden relative">
+    <>
+    <style>{`
+      @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .animate-gradient-bg {
+        background-size: 200% 200%;
+        animation: gradientBG 15s ease infinite;
+      }
+    `}</style>
+    <div class="animate-gradient-bg min-h-screen bg-[#0d2a1a] bg-linear-to-br from-[#0d2a1a] via-[#1a4d35] to-[#0a1f14] flex items-center justify-center p-6 text-center font-sans overflow-hidden relative">
       {/* Background Orbs */}
       <div ref={orb1} class="absolute top-0 left-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-green-500/20 blur-[80px] md:blur-[100px] rounded-full pointer-events-none z-0"></div>
       <div ref={orb2} class="absolute bottom-0 right-0 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-emerald-500/20 blur-[100px] md:blur-[120px] rounded-full pointer-events-none z-0"></div>
       <div ref={orb3} class="absolute top-1/4 right-1/4 w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-teal-500/15 blur-[60px] md:blur-[80px] rounded-full pointer-events-none z-0"></div>
+
+      {/* Background White Dots */}
+      <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {dots.map(dot => (
+          <div 
+            class="gsap-dot absolute bg-white rounded-full opacity-30"
+            style={{
+              left: `${dot.x}%`,
+              top: `${dot.y}%`,
+              width: `${dot.size}px`,
+              height: `${dot.size}px`
+            }}
+          ></div>
+        ))}
+      </div>
 
       <div class="relative max-w-lg w-full z-10 px-4">
         <Show when={!response()}>
@@ -97,7 +177,7 @@ const App = () => {
             
             <div class="flex flex-col gap-4 md:gap-6 justify-center items-center">
               <button 
-                onClick={() => setResponse('accepted')}
+                onClick={handleAccept}
                 class="w-full md:w-auto px-8 py-4 bg-white text-[#0d2a1a] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10 z-20"
               >
                 Özrünü kabul ediyorum
@@ -127,6 +207,7 @@ const App = () => {
         </Show>
       </div>
     </div>
+    </>
   );
 };
 
