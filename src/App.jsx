@@ -31,7 +31,9 @@ const App = () => {
     "Affettin biliyorum 😉",
     "Bir tanesin sen... ❤️",
     "Kaçamazsın! ❤️",
-    "Sabaha kadar devam ettirebilirim 😊"
+    "Bir tanesin sen... ❤️",
+    "Sabaha kadar devam ettirebilirim 😊",
+    "İnatçı Keçi Seniii ❤️"
   ];
 
   onMount(() => {
