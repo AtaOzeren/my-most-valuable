@@ -1,12 +1,15 @@
 import { createSignal, Show, onMount } from "solid-js";
 import { gsap } from "gsap";
+import kvSmileGif from "./assets/last-gift/Kurtlar Vadisi Smile GIF by ikas.gif";
+import kvSadGif from "./assets/last-gift/Sad Kurtlar Vadisi GIF by ikas.gif";
 
 const App = () => {
   const [response, setResponse] = createSignal(null);
   const [rejectCount, setRejectCount] = createSignal(0);
   const [buttonPos, setButtonPos] = createSignal({ x: 0, y: 0 });
   const [gifIndex, setGifIndex] = createSignal(-1);
-  const [acceptedGif, setAcceptedGif] = createSignal("");
+  const [acceptedGifs, setAcceptedGifs] = createSignal([]);
+  const [fireworks, setFireworks] = createSignal([]);
 
   // Dynamically import all gifs from the my-love folder
   const gifs = Object.values(import.meta.glob('./assets/my-love/*.gif', { eager: true, query: '?url', import: 'default' }));
@@ -117,10 +120,43 @@ const App = () => {
     gsap.to(orb2, { scale: 12, backgroundColor: "rgba(255, 105, 180, 0.6)", duration: 1.5, ease: "power3.inOut", delay: 0.1 });
     gsap.to(orb3, { scale: 12, backgroundColor: "rgba(255, 0, 0, 0.6)", duration: 1.5, ease: "power3.inOut", delay: 0.2 });
 
-    // Kabul edilince rastgele sevimli bir gif seç
-    if (gifs.length > 0) {
-      setAcceptedGif(gifs[Math.floor(Math.random() * gifs.length)]);
-    }
+    // Son iki gifi yan yana koymak için
+    setAcceptedGifs([kvSadGif, kvSmileGif]);
+
+    // Havai fişek parçacıkları oluştur
+    const particles = Array.from({ length: 80 }).map((_, i) => ({
+      id: `fw-${i}`,
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2 + 100, // Biraz daha aşağıdan patlasın
+      color: ['#ff0000', '#ff69b4', '#ffffff', '#ffd700', '#ff8c00'][Math.floor(Math.random() * 5)],
+      angle: Math.random() * Math.PI * 2,
+      velocity: Math.random() * 20 + 10,
+      size: Math.random() * 8 + 3
+    }));
+    setFireworks(particles);
+
+    // Havai fişekleri fırlat
+    setTimeout(() => {
+      particles.forEach((p) => {
+        gsap.to(`#${p.id}`, {
+          x: `+=${Math.cos(p.angle) * p.velocity * 30}`,
+          y: `+=${Math.sin(p.angle) * p.velocity * 30 + 300}`, // gravity
+          opacity: 0,
+          scale: 0.5,
+          duration: Math.random() * 1.5 + 1,
+          ease: "power2.out"
+        });
+      });
+      
+      // Kalp atışı efekti
+      gsap.to(".pulsing-heart", {
+        scale: 1.6,
+        duration: 0.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }, 50);
 
     setResponse('accepted');
   };
@@ -229,8 +265,19 @@ const App = () => {
                 <Show when={rejectCount() < 16} fallback={
                   <div class="main-text inline-block text-3xl md:text-5xl font-bold animate-scale-in">Bunu yapmak zorundayım :D</div>
                 }>
-                  <div class="main-text inline-block">Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım,</div> <br class="hidden md:block" />
-                  <div class="apology-text inline-block text-red-800 font-medium italic mt-2">çok özür dilerim.</div>
+                  <Show when={rejectCount() < 2}>
+                    <div class="main-text inline-block">Güzel sevgilim benim, ben bugün senin bana ihtiyacın olduğu bir anda yanında olamadım,</div> <br class="hidden md:block" />
+                    <div class="apology-text inline-block text-red-800 font-medium italic mt-2">çok özür dilerim.</div>
+                  </Show>
+                  <Show when={rejectCount() === 2}>
+                    <div class="main-text inline-block animate-scale-in text-red-400 font-medium">haklısın aşkımmm :(</div>
+                  </Show>
+                  <Show when={rejectCount() === 3}>
+                    <div class="main-text inline-block animate-scale-in text-red-400 font-medium">Bir daha olmayacak</div>
+                  </Show>
+                  <Show when={rejectCount() >= 4 && rejectCount() < 16}>
+                    <div class="main-text inline-block animate-scale-in text-pink-400 font-bold">Kız yicem seni heeeee</div>
+                  </Show>
                 </Show>
               </h1>
 
@@ -261,19 +308,41 @@ const App = () => {
           </Show>
 
           <Show when={response() === 'accepted'}>
-            <div class="relative space-y-6 animate-scale-in flex flex-col items-center">
-              <Show when={acceptedGif()}>
-                <div class="h-48 md:h-64 flex items-center justify-center mb-6">
+            <div class="relative space-y-6 animate-scale-in flex flex-col items-center z-10">
+              <Show when={acceptedGifs().length > 0}>
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-center mb-6">
                   <img
-                    src={acceptedGif()}
-                    alt="Happy love gif"
-                    class="max-h-full rounded-3xl shadow-2xl border-4 border-white/10"
+                    src={acceptedGifs()[0]}
+                    alt="Happy love gif 1"
+                    class="h-40 md:h-56 rounded-3xl shadow-2xl border-4 border-white/10"
+                  />
+                  <img
+                    src={acceptedGifs()[1]}
+                    alt="Happy love gif 2"
+                    class="h-40 md:h-56 rounded-3xl shadow-2xl border-4 border-white/10"
                   />
                 </div>
               </Show>
-              <div class="text-5xl md:text-6xl mb-6">❤️</div>
+              <div class="text-5xl md:text-7xl mb-6 pulsing-heart inline-block">❤️</div>
               <h1 class="text-white text-3xl md:text-4xl font-light">Seni çok seviyorum.</h1>
               <p class="text-white/40 italic text-sm md:text-base">Dünyanın en şanslı erkeğiyim...</p>
+            </div>
+            
+            {/* Havai Fişekler */}
+            <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+              {fireworks().map((p) => (
+                <div
+                  id={p.id}
+                  class="absolute rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                  style={{
+                    left: `${p.x}px`,
+                    top: `${p.y}px`,
+                    width: `${p.size}px`,
+                    height: `${p.size}px`,
+                    background: p.color
+                  }}
+                />
+              ))}
             </div>
           </Show>
         </div>
